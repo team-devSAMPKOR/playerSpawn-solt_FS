@@ -2,6 +2,8 @@
 #include <a_samp>
 //#if defined FILTERSCRIPT
 
+new Float:pos[4];
+
 public OnFilterScriptInit(){
 	print("PSS-FS Load");
 	return 1;
@@ -23,17 +25,17 @@ public OnPlayerCommandText(playerid, cmdtext[]){
         if(!IsPlayerAdmin(playerid)) return SendClientMessage(playerid,-1,"당신은 어드민이 아닙니다.");
 
         tmp[0] = strtok(cmdtext, idx);
-        if(!strlen(tmp[0]))return SendClientMessage(playerid,-1,"/정렬소환(pss) [type : User 0/Car 1]");
+        if(!strlen(tmp[0]))return SendClientMessage(playerid,-1,"/pss [col] [low] [type : User 0/Car 1]");
 
         new type = strval(tmp[0]);
         switch(type){
-			case 0:soltSpawn(type);
+			case 0:soltSpawn(playerid, type);
 			case 1:{
 				tmp[1] = strtok(cmdtext, idx);
 				
-				if(!strlen(tmp[1]))return SendClientMessage(playerid,-1, "/pss [type] [car model id]");
+				if(!strlen(tmp[1]))return SendClientMessage(playerid,-1, "/pss [col] [low] [type] [car model id]");
 				new model = strval(tmp[1]);
-				soltSpawn(type, model);
+				soltSpawn(playerid, type, model);
 			}
         }
         return 1;
@@ -41,7 +43,10 @@ public OnPlayerCommandText(playerid, cmdtext[]){
 	return 0;
 }
 
-stock soltSpawn(type, model = 0){
+stock soltSpawn(playerid, type, model = 0){
+	GetPlayerPos(playerid, pos[0], pos[1], pos[2]);
+	GetPlayerFacingAngle(playerid, pos[3]);
+
     for(new i=0; i < GetMaxPlayers(); i++){
       if(IsPlayerConnected(i)){
 		switch(type){
@@ -52,8 +57,10 @@ stock soltSpawn(type, model = 0){
     }
 }
 stock humanSpawn(playerid){
+    SetPlayerPos(playerid, pos[0], pos[1], pos[2]);
+    SetPlayerFacingAngle(playerid, pos[3]);
 	new str[20];
-	format(str, sizeof(str), "%d", playerid);
+	format(str, sizeof(str), "%d - %f,%f,%f,%f", playerid, pos[0],pos[1],pos[2],pos[3]);
     SendClientMessage(playerid,-1,str);
 }
 stock carSpawn(playerid, model){
